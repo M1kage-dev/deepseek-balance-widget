@@ -1,5 +1,7 @@
 # DeepSeek Balance
 
+![CI](https://github.com/Mikage777/deepseek-balance-widget/actions/workflows/ci.yml/badge.svg)
+
 A macOS desktop widget that shows your **DeepSeek API balance** and **how much you spent today**.
 A small always-there card on your wallpaper — no dock icon, no menu bar clutter, no Electron.
 

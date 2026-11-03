@@ -1,5 +1,7 @@
 # DeepSeek Balance
 
+![CI](https://github.com/Mikage777/deepseek-balance-widget/actions/workflows/ci.yml/badge.svg)
+
 Виджет рабочего стола macOS: **баланс DeepSeek API** и **сколько потрачено за сегодня**.
 Маленькая карточка на обоях — без иконки в доке, без Electron, без меню-бара.
 
