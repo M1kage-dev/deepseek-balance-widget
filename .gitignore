@@ -1,0 +1,12 @@
+# build output
+.build/
+dist/
+*.app
+
+# local state and secrets — never commit
+state.json
+config.json
+*.log
+.env
+
+.DS_Store

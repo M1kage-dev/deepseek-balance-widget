@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; background: transparent; overflow: hidden;
+               -webkit-user-select: none; user-select: none; cursor: default; }
+  .card {
+    position: relative; width: 100%; height: 100%;
+    padding: 13px 16px 11px;
+    border-radius: 16px;
+    background:
+      radial-gradient(120% 90% at 12% -10%, rgba(90,130,255,.30), rgba(90,130,255,0) 60%),
+      radial-gradient(90% 80% at 100% 110%, rgba(120,80,220,.26), rgba(120,80,220,0) 65%),
+      linear-gradient(160deg, rgba(24,26,38,.975), rgba(13,14,20,.99));
+    border: 1px solid rgba(255,255,255,.10);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.09), 0 10px 30px rgba(0,0,0,.45);
+    font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+    color: #f2f4fa;
+    display: flex; flex-direction: column;
+  }
+  .head { display: flex; align-items: center; gap: 7px; height: 16px; cursor: grab; }
+  .brand { font-size: 10px; font-weight: 700; letter-spacing: .14em; color: rgba(226,232,255,.62);
+           white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 190px; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: #3ddc84; box-shadow: 0 0 7px #3ddc84cc; }
+  .dot.stale { background: #ffb020; box-shadow: 0 0 7px #ffb020cc; }
+  .dot.err { background: #ff5a5a; box-shadow: 0 0 7px #ff5a5acc; }
+  .spacer { flex: 1; }
+  .chip { font-size: 9.5px; letter-spacing: .01em; color: rgba(226,232,255,.46);
+          font-variant-numeric: tabular-nums; padding: 1.5px 6px; border-radius: 999px;
+          background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.06);
+          white-space: nowrap; }
+
+  .balrow { display: flex; align-items: baseline; gap: 6px; margin-top: 7px; }
+  .cur { font-size: 19px; font-weight: 500; color: rgba(226,232,255,.65); }
+  .bal { font-size: 40px; font-weight: 600; letter-spacing: -.02em; line-height: 1.02;
+         font-variant-numeric: tabular-nums; text-shadow: 0 2px 18px rgba(120,160,255,.35); }
+  .code { font-size: 10px; font-weight: 600; letter-spacing: .1em; color: rgba(226,232,255,.42);
+          margin-left: 2px; }
+
+  .spend { display: flex; align-items: center; gap: 8px; margin-top: 1px; height: 17px; }
+  .lbl { font-size: 11px; color: rgba(226,232,255,.52); white-space: nowrap; }
+  .val { font-size: 13px; font-weight: 650; font-variant-numeric: tabular-nums; color: #ffc45c; }
+  .val.zero { color: rgba(226,232,255,.62); }
+  .note { font-size: 10px; color: rgba(226,232,255,.33); white-space: nowrap; }
+
+  .spark { flex: 1; display: flex; align-items: flex-end; margin-top: 4px; min-height: 0; }
+  svg { width: 100%; height: 40px; display: block; }
+
+  .foot { display: flex; align-items: center; gap: 6px; margin-top: 5px;
+          font-size: 9.5px; color: rgba(226,232,255,.38); font-variant-numeric: tabular-nums; }
+  .foot .err { color: #ff8a8a; }
+  .foot .hint { color: rgba(143,176,255,.75); cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <div class="head">
+    <span class="brand" id="brand">DEEPSEEK API</span>
+    <span class="dot" id="dot"></span>
+    <span class="spacer"></span>
+    <span class="chip" id="interval">—</span>
+  </div>
+
+  <div class="balrow">
+    <span class="cur" id="sym">¥</span>
+    <span class="bal" id="balance">—</span>
+    <span class="code" id="curcode">CNY</span>
+  </div>
+
+  <div class="spend">
+    <span class="lbl" id="lbl-today">today</span>
+    <span class="val zero" id="today">—</span>
+    <span class="note" id="todaynote"></span>
+    <span class="spacer"></span>
+    <span class="lbl" id="lbl-week">7 days</span>
+    <span class="val zero" id="week" style="font-size:11px">—</span>
+  </div>
+
+  <div class="spark">
+    <svg id="spark" viewBox="0 0 300 42" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#7aa2ff" stop-opacity=".38"/>
+          <stop offset="100%" stop-color="#7aa2ff" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path id="area" fill="url(#fill)"></path>
+      <path id="line" fill="none" stroke="#8fb0ff" stroke-width="1.6"
+            stroke-linejoin="round" stroke-linecap="round"></path>
+      <circle id="tip" r="2.4" fill="#dfe8ff"></circle>
+    </svg>
+  </div>
+
+  <div class="foot">
+    <span id="updated">—</span>
+    <span class="spacer"></span>
+    <span class="hint" id="hint">refresh</span>
+  </div>
+</div>
+
+<script>
+// Строки интерфейса. Язык приходит из конфига (locale: "en" | "ru").
+const STRINGS = {
+  en: {
+    today: 'today', week: '7 days', updated: 'updated', every: 'every',
+    min: 'min', sec: 's', noData: 'no data', collecting: 'collecting',
+    refresh: 'refresh', refreshing: 'refreshing…', since: 'since',
+    noKey: 'set API key', each: 'every', points: n => n === 1 ? 'point' : 'points',
+    ago: 'ago',
+  },
+  ru: {
+    today: 'сегодня', week: '7 дней', updated: 'обновлено', every: 'каждые',
+    min: 'мин', sec: 'с', noData: 'нет данных', collecting: 'копим данные',
+    refresh: 'обновить', refreshing: 'обновляю…', since: 'с',
+    noKey: 'нужен ключ API', each: 'каждые', points: pluralRu,
+    ago: 'назад',
+  },
+};
+
+function pluralRu(n) {
+  const m10 = n % 10, m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return 'точка';
+  if (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20)) return 'точки';
+  return 'точек';
+}
+
+let L = STRINGS.en;
+let money = v => '¥' + v.toFixed(2);
+
+function drawSpark(points) {
+  const line = document.getElementById('line');
+  const area = document.getElementById('area');
+  const tip = document.getElementById('tip');
+  const W = 300, H = 42, pad = 3;
+  const pts = (points || []).filter(p => p && p[1] !== null && p[1] !== undefined);
+  if (pts.length < 2) {
+    line.setAttribute('stroke-dasharray', '3 5');
+    line.setAttribute('stroke-opacity', '.32');
+    line.setAttribute('stroke-width', '1.2');
+    line.setAttribute('d', 'M2 ' + (H / 2).toFixed(1) + ' L' + (W - 3) + ' ' + (H / 2).toFixed(1));
+    area.setAttribute('d', '');
+    tip.setAttribute('r', 0);
+    return;
+  }
+  line.setAttribute('stroke-dasharray', 'none');
+  line.setAttribute('stroke-opacity', '1');
+  line.setAttribute('stroke-width', '1.6');
+  const vals = pts.map(p => p[1]);
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  if (hi - lo < 0.02) { hi += 0.01; lo -= 0.01; }
+  const t0 = pts[0][0], t1 = pts[pts.length - 1][0];
+  const span = Math.max(1, t1 - t0);
+  const x = t => 2 + ((t - t0) / span) * (W - 5);
+  const y = v => pad + (1 - (v - lo) / (hi - lo)) * (H - pad * 2);
+  const d = pts.map((p, k) => (k === 0 ? 'M' : 'L') + x(p[0]).toFixed(2) + ' ' + y(p[1]).toFixed(2)).join(' ');
+  line.setAttribute('d', d);
+  area.setAttribute('d', d + ' L' + x(t1).toFixed(2) + ' ' + H + ' L' + x(t0).toFixed(2) + ' ' + H + ' Z');
+  const last = pts[pts.length - 1];
+  tip.setAttribute('cx', x(last[0]).toFixed(2));
+  tip.setAttribute('cy', y(last[1]).toFixed(2));
+  tip.setAttribute('r', 2.4);
+}
+
+function num(v, digits) {
+  return v.toLocaleString(L === STRINGS.ru ? 'ru-RU' : 'en-US',
+    { minimumFractionDigits: digits, maximumFractionDigits: digits });
+}
+
+window.render = function (s) {
+  L = STRINGS[s.locale] || STRINGS.en;
+  const SYMBOLS = { CNY: '¥', USD: '$', EUR: '€', RUB: '₽' };
+  const sym = s.symbol || SYMBOLS[s.currency] || '';
+  money = v => sym + num(v, 2);
+
+  document.getElementById('brand').textContent = s.title || 'DEEPSEEK API';
+  document.getElementById('sym').textContent = sym;
+  document.getElementById('curcode').textContent = s.currency || '';
+  document.getElementById('lbl-today').textContent = L.today;
+  document.getElementById('lbl-week').textContent = L.week;
+  document.getElementById('balance').textContent =
+    (s.balance === null || s.balance === undefined) ? '—' : num(s.balance, 2);
+
+  const t = s.today || {};
+  const todayEl = document.getElementById('today');
+  const weekEl = document.getElementById('week');
+  const noteEl = document.getElementById('todaynote');
+  if (t.samples >= 2) {
+    const spent = t.spent || 0;
+    todayEl.textContent = (spent > 0 ? '−' : '') + money(spent);
+    todayEl.className = 'val' + (spent > 0 ? '' : ' zero');
+    noteEl.textContent = (t.covers || !t.from) ? '' : L.since + ' ' + t.from;
+  } else {
+    todayEl.textContent = '—';
+    todayEl.className = 'val zero';
+    noteEl.textContent = t.samples === 1 ? L.collecting : L.noData;
+  }
+  weekEl.textContent = (s.week === null || s.week === undefined) ? '—'
+    : ((s.week > 0 ? '−' : '') + money(s.week));
+  weekEl.className = 'val' + (s.week > 0 ? '' : ' zero');
+
+  drawSpark(s.spark || []);
+
+  const dot = document.getElementById('dot');
+  dot.className = 'dot' + (s.ok ? (s.stale ? ' stale' : '') : ' err');
+
+  const upd = document.getElementById('updated');
+  if (s.ok) {
+    upd.className = '';
+    upd.textContent = L.updated + ' ' + (s.updated_text || '')
+      + (s.points ? ' · ' + s.points + ' ' + L.points(s.points) : '');
+  } else {
+    upd.className = 'err';
+    upd.textContent = s.has_key === false ? L.noKey : (s.error || L.noData);
+  }
+
+  const iv = s.interval >= 60 ? Math.round(s.interval / 60) + ' ' + L.min : s.interval + ' ' + L.sec;
+  document.getElementById('interval').textContent = L.each + ' ' + iv;
+  document.getElementById('hint').textContent = L.refresh;
+};
+
+document.getElementById('hint').addEventListener('click', () => {
+  if (window.webkit && window.webkit.messageHandlers.widget) {
+    window.webkit.messageHandlers.widget.postMessage({ action: 'refresh' });
+    const el = document.getElementById('hint');
+    el.textContent = L.refreshing;
+    setTimeout(() => { el.textContent = L.refresh; }, 1600);
+  }
+});
+</script>
+</body>
+</html>
