@@ -1,6 +1,6 @@
 # DeepSeek Balance
 
-![CI](https://github.com/Mikage777/deepseek-balance-widget/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/M1kage-dev/deepseek-balance-widget/actions/workflows/ci.yml/badge.svg)
 
 A macOS desktop widget that shows your **DeepSeek API balance** and **how much you spent today**.
 A small always-there card on your wallpaper — no dock icon, no menu bar clutter, no Electron.
@@ -19,7 +19,7 @@ Requires macOS 13 (Ventura) or newer and Xcode Command Line Tools
 (`xcode-select --install` — Xcode itself is not needed).
 
 ```bash
-git clone https://github.com/Mikage777/deepseek-balance-widget.git
+git clone https://github.com/M1kage-dev/deepseek-balance-widget.git
 cd deepseek-balance-widget
 ./install.sh
 ```
@@ -28,7 +28,7 @@ The script compiles the app, puts it in `~/Applications`, enables launch at logi
 (`--no-login-item` skips that) and starts it. On first run the widget asks for your
 DeepSeek API key and stores it in the Keychain.
 
-**Prebuilt app:** grab `DeepSeek-Balance-1.0.0.zip` from [Releases](https://github.com/Mikage777/deepseek-balance-widget/releases),
+**Prebuilt app:** grab `DeepSeek-Balance-1.0.0.zip` from [Releases](https://github.com/M1kage-dev/deepseek-balance-widget/releases),
 unzip, move to `/Applications`. It is ad-hoc signed, not notarized, so macOS will warn on
 first launch — right-click → **Open**, or:
 

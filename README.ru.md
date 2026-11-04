@@ -1,6 +1,6 @@
 # DeepSeek Balance
 
-![CI](https://github.com/Mikage777/deepseek-balance-widget/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/M1kage-dev/deepseek-balance-widget/actions/workflows/ci.yml/badge.svg)
 
 Виджет рабочего стола macOS: **баланс DeepSeek API** и **сколько потрачено за сегодня**.
 Маленькая карточка на обоях — без иконки в доке, без Electron, без меню-бара.
@@ -19,7 +19,7 @@
 (`xcode-select --install`, сам Xcode не нужен).
 
 ```bash
-git clone https://github.com/Mikage777/deepseek-balance-widget.git
+git clone https://github.com/M1kage-dev/deepseek-balance-widget.git
 cd deepseek-balance-widget
 ./install.sh
 ```
@@ -28,7 +28,7 @@ cd deepseek-balance-widget
 (`--no-login-item` — без него) и запустит. При первом запуске виджет спросит ключ
 DeepSeek API и сохранит его в Keychain.
 
-**Готовое приложение:** `DeepSeek-Balance-1.0.0.zip` из [Releases](https://github.com/Mikage777/deepseek-balance-widget/releases),
+**Готовое приложение:** `DeepSeek-Balance-1.0.0.zip` из [Releases](https://github.com/M1kage-dev/deepseek-balance-widget/releases),
 распаковать и перетащить в `/Applications`. Подпись ad-hoc, без нотаризации, поэтому macOS
 предупредит при первом запуске — правый клик → **Открыть**, либо:
 
